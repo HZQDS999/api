@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微软邮箱云注册机-短效令牌微软邮箱</title>
+    <!-- 引入 Bootstrap 美化界面 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入图标库 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        /* 全局黑色背景基础样式 - 紧凑版 */
+        body { 
+            padding: 10px !important; 
+            background-color: #000 !important; 
+            color: #e0e0e0 !important; /* 全局浅色文字 */
+            min-height: 100vh;
+            margin: 0 !important;
+        }
+        .form-group { margin-bottom: 10px !important; }
+        
+        /* 日志区域样式 - 恢复正常显示邮箱数据 */
+        .log-area { 
+            height: 180px !important; 
+            border: 1px solid #333; 
+            border-radius: 4px; 
+            padding: 8px !important; 
+            overflow-y: auto; 
+            background: #111 !important; /* 日志区域深色背景 */
+            font-family: monospace;
+            color: #e0e0e0;
+            white-space: pre-wrap; /* 自动换行 */
+            word-break: break-all;
+            font-size: 13px !important;
+        }
+        
+        /* 库存卡片样式 - 超紧凑版 */
+        .stock-card { 
+            margin-bottom: 8px !important; /* 进一步减小底部间距 */
+            padding: 8px !important; /* 大幅减小内边距 */
+            border-radius: 6px !important; /* 缩小圆角 */
+            background-color: #1a1a1a !important; 
+            border: 1px solid #444 !important;
+            transition: all 0.3s ease;
+            height: 100%; 
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+        }
+        .stock-card:hover {
+            border-color: #666 !important;
+            transform: translateY(-1px); /* 减小上浮效果 */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+        }
+        
+        /* 库存卡片标签 - 超小版 */
+        .stock-tag {
+            display: inline-block;
+            padding: 1px 6px !important; /* 减小内边距 */
+            border-radius: 12px !important; /* 缩小圆角 */
+            font-size: 11px !important; /* 进一步缩小字体 */
+            margin-bottom: 4px !important; /* 减小底部间距 */
+            background-color: #19875433; 
+            color: #198754; 
+            border: 1px solid #19875455;
+        }
+        
+        /* 库存数字样式 - 超紧凑版 */
+        .stock-value {
+            font-size: 22px !important; /* 大幅缩小库存数字（原28px） */
+            font-weight: bold;
+            color: #fff;
+            margin: 2px 0 !important; /* 大幅减小上下间距 */
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1 !important; /* 减小行高 */
+        }
+        
+        /* 功能说明文字 - 超紧凑版 */
+        .stock-desc {
+            font-size: 10px !important; /* 进一步缩小字体 */
+            color: #ccc;
+            line-height: 1.2 !important; /* 减小行高 */
+            margin-bottom: 2px !important; /* 减小底部间距 */
+        }
+        
+        /* 状态提示 - 超紧凑版 */
+        .stock-status {
+            font-size: 10px !important; /* 进一步缩小字体 */
+            margin-top: 2px !important; /* 减小顶部间距 */
+            line-height: 1.2 !important;
+        }
+        .status-loading { color: #ffc107; }
+        .status-error { color: #dc3545; }
+        .status-success { color: #28a745; }
+        
+        /* 按钮组间距 - 紧凑版 */
+        .btn-group { 
+            margin-bottom: 15px !important; 
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px !important; /* 减小按钮间距 */
+        }
+        .btn-group .btn { 
+            flex: 1 1 auto; 
+            min-width: 100px !important; 
+            padding: 6px 10px !important; /* 缩小按钮内边距 */
+            font-size: 13px !important; /* 缩小按钮字体 */
+        }
+        
+        /* 日志类型颜色（仅保留成功类型，用于邮箱显示） */
+        .timestamp { color: #6c757d; font-size: 12px !important; }
+        .success { color: #28a745; } /* 绿色 - 成功获取的邮箱 */
+        
+        /* 卡片样式修改 - 紧凑版 */
+        .card { 
+            background-color: #1a1a1a !important; 
+            border: 1px solid #333 !important; 
+            color: #e0e0e0 !important;
+            margin-bottom: 15px !important;
+        }
+        .card-body { padding: 12px !important; } /* 减小卡片内边距 */
+        .card-title { color: #fff !important; font-size: 15px !important; margin-bottom: 10px !important; }
+        .card-text { color: #ccc !important; font-size: 13px !important; }
+        
+        /* 输入框、下拉框样式 - 紧凑版 */
+        .form-control {
+            background-color: #2d2d2d !important;
+            border: 1px solid #444 !important;
+            color: #e0e0e0 !important;
+            padding: 6px 8px !important; /* 缩小输入框内边距 */
+            font-size: 13px !important; /* 缩小输入框字体 */
+            height: auto !important;
+        }
+        .form-control:focus {
+            border-color: #666 !important;
+            box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25) !important;
+        }
+        
+        /* 标题样式 - 紧凑版 */
+        .stock-top-title {
+            color: #fff;
+            margin: 0 0 8px !important; /* 进一步减小底部间距（原12px） */
+            font-size: 16px !important; /* 缩小标题字体（原18px） */
+            text-align: center;
+            font-weight: bold;
+        }
+        h1 {
+            font-size: 22px !important;
+            margin-bottom: 15px !important;
+            padding-bottom: 5px !important;
+        }
+        .section-title {
+            color: #fff;
+            margin: 15px 0 8px !important;
+            font-size: 15px !important;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        /* 复制日志按钮 - 紧凑版 */
+        .copy-log-btn {
+            position: absolute;
+            right: 10px !important;
+            top: 10px !important;
+            font-size: 11px !important;
+            padding: 2px 6px !important;
+        }
+        
+        /* 错误提示框 - 紧凑版 */
+        .error-alert {
+            background-color: #3d1319 !important;
+            border: 1px solid #dc354555 !important;
+            color: #ffc1c7 !important;
+            margin-bottom: 10px !important;
+            padding: 6px 10px !important;
+            border-radius: 4px !important;
+            font-size: 11px !important;
+        }
+        
+        /* 统计卡片样式 - 紧凑版 */
+        .stats-card {
+            padding: 8px !important;
+            border-radius: 6px !important;
+            background-color: #1a1a1a !important;
+            border: 1px solid #333 !important;
+            text-align: center;
+        }
+        .stats-value {
+            font-size: 18px !important;
+            font-weight: bold;
+            margin: 3px 0 !important;
+        }
+        .stats-card i { font-size: 14px !important; }
+        
+        /* 表单相关 - 紧凑版 */
+        label {
+            font-size: 13px !important;
+            margin-bottom: 4px !important;
+        }
+        .form-text {
+            font-size: 11px !important;
+            margin-top: 2px !important;
+        }
+        .form-check {
+            margin-bottom: 8px !important;
+        }
+        .form-check-label {
+            font-size: 12px !important;
+        }
+        
+        /* 下载按钮紧凑样式 */
+        .download-btns {
+            display: flex;
+            gap: 6px !important;
+            margin-top: 8px !important;
+        }
+        .download-btns .btn {
+            padding: 4px 8px !important;
+            font-size: 12px !important;
+            flex: 1;
+        }
+        
+        /* 响应式优化 - 保持紧凑 */
+        @media (max-width: 768px) {
+            .stock-value { font-size: 20px !important; }
+            .btn-group .btn { min-width: 80px !important; padding: 5px 8px !important; }
+            .stock-top-title { font-size: 15px !important; }
+            h1 { font-size: 20px !important; }
+            .stats-value { font-size: 16px !important; }
+            .log-area { height: 150px !important; }
+        }
+        @media (max-width: 576px) {
+            .stock-value { font-size: 18px !important; }
+            .btn-group .btn { width: 100%; margin-bottom: 4px !important; }
+            .stock-card { padding: 6px !important; }
+            .stats-card { margin-bottom: 8px !important; }
+            .log-area { height: 120px !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4 text-white text-center">微软邮箱云注册机-短效令牌微软邮箱</h1>
+
+        <!-- 实时库存区域（置顶显示，超紧凑版） -->
+        <h2 class="stock-top-title"><i class="bi bi-archive-fill text-success"></i> 实时邮箱运行数量-需要卡密请联系小黑：QQ113575320</h2>
+        <div class="row mb-3"> <!-- 保持底部间距 -->
+            <div class="col-md-6 mb-1"> <!-- 大幅减小底部间距（原2px） -->
+                <div class="card stock-card">
+                    <span class="stock-tag">hotmail邮箱</span>
+                    <div class="stock-value" id="stock4">-</div>
+                    <div class="stock-desc">下拉框第1项</div> <!-- 简化描述文字 -->
+                    <div class="stock-status status-loading"><i class="bi bi-arrow-clockwise"></i> 加载中</div> <!-- 简化提示文字 -->
+                </div>
+            </div>
+            <div class="col-md-6 mb-1"> <!-- 大幅减小底部间距（原2px） -->
+                <div class="card stock-card">
+                    <span class="stock-tag">outlook邮箱</span>
+                    <div class="stock-value" id="stock5">-</div>
+                    <div class="stock-desc">下拉框第2项</div> <!-- 简化描述文字 -->
+                    <div class="stock-status status-loading"><i class="bi bi-arrow-clockwise"></i> 加载中</div> <!-- 简化提示文字 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 配置参数区域（紧凑版） -->
+        <div class="card mb-3"> <!-- 减小底部间距 -->
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-gear-fill"></i> 配置参数</h5>
+                
+                <!-- 错误提示框（默认隐藏） -->
+                <div id="errorAlert" class="error-alert d-none">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span id="errorAlertText">发生错误，请查看日志了解详情</span>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="cardNumber">卡密（必填）</label>
+                            <input type="text" id="cardNumber" class="form-control" placeholder="输入卡密">
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="emailCount">单次数量</label>
+                                    <input type="number" id="emailCount" class="form-control" value="10" min="1" max="1000" placeholder="每次数量">
+                                    <small class="form-text text-muted" style="color: #888 !important;">1-1000个</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="cycleCount">循环次数</label>
+                                    <input type="number" id="cycleCount" class="form-control" value="1" min="1" max="100" placeholder="循环次数">
+                                    <small class="form-text text-muted" style="color: #888 !important;">1-100次</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="delayMs">单次延时(ms)</label>
+                                    <input type="number" id="delayMs" class="form-control" value="1000" min="0" max="10000">
+                                    <small class="form-text text-muted" style="color: #888 !important;">0-10000</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="cycleDelayMs">循环间隔(ms)</label>
+                                    <input type="number" id="cycleDelayMs" class="form-control" value="3000" min="0" max="30000">
+                                    <small class="form-text text-muted" style="color: #888 !important;">建议≥3000</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="functionType">邮箱类型</label>
+                            <select id="functionType" class="form-control">
+                                <option value="5">hotmail邮箱</option>
+                                <option value="6">outlook邮箱</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 勾选框与下载按钮合并区域 -->
+                <div class="row mt-2">
+                    <div class="col-6">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="onlyEmailPwd" style="background-color: #2d2d2d; border-color: #444;">
+                            <label class="form-check-label" for="onlyEmailPwd" style="color: #ccc; font-size: 12px;">仅提取邮箱和密码</label>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="autoDownload" style="background-color: #2d2d2d; border-color: #444;">
+                            <label class="form-check-label" for="autoDownload" style="color: #ccc; font-size: 12px;">执行完成自动下载</label>
+                        </div>
+                    </div>
+                    
+                    <!-- 下载按钮整合到此处 -->
+                    <div class="col-12 download-btns">
+                        <button id="downloadMainBtn" class="btn btn-secondary" disabled><i class="bi bi-download"></i> 下载令牌文件</button>
+                        <button id="downloadBackupBtn" class="btn btn-secondary" disabled><i class="bi bi-download"></i> 下载备用文件</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 功能按钮区域（紧凑版） -->
+        <div class="btn-group">
+            <button id="startBtn" class="btn btn-primary"><i class="bi bi-play-fill"></i> 开始获取</button>
+            <button id="stopBtn" class="btn btn-danger" disabled><i class="bi bi-stop-fill"></i> 停止获取</button>
+            <button id="balanceBtn" class="btn btn-success"><i class="bi bi-wallet-fill"></i> 查询余额</button>
+            <button id="clearLogBtn" class="btn btn-warning"><i class="bi bi-trash-fill"></i> 清空日志</button>
+        </div>
+
+        <!-- 统计区域（紧凑版） -->
+        <div class="row mb-3 mt-2"> <!-- 减小间距 -->
+            <div class="col-3">
+                <div class="card stats-card">
+                    <i class="bi bi-check-circle success"></i> 成功
+                    <div class="stats-value success" id="successCount">0</div>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="card stats-card">
+                    <i class="bi bi-x-circle error"></i> 失败
+                    <div class="stats-value error" id="failureCount">0</div>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="card stats-card">
+                    <i class="bi bi-repeat cycle"></i> 当前循环
+                    <div class="stats-value cycle" id="currentCycle">0/0</div>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="card stats-card">
+                    <i class="bi bi-wallet2 balance"></i> 剩余可注册
+                    <div class="stats-value balance" id="balanceCount">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 日志区域（最下方，仅显示获取的邮箱） -->
+        <div class="card position-relative mb-3"> <!-- 减小底部间距 -->
+            <div class="card-body">
+                <h5 class="card-title d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-file-text-fill"></i> 获取的邮箱数据</span>
+                    <button id="copyLogBtn" class="btn btn-secondary copy-log-btn"><i class="bi bi-clipboard"></i> 复制</button>
+                </h5>
+                <div class="log-area" id="logArea"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===================== 核心配置 =====================
+        const CONFIG = {
+            API_ORIGIN: {
+                SHANKEYUN: 'https://api.shankeyun.com/api'
+            },
+            TOKEN_LIST: [
+                '9e5f94bc-e8a4-4e73-b8be-63364c29d753',
+                '8b4ba9dd-3ea5-4e5f-86f1-ddba2230dcf2',
+                'dbc8e03a-b00c-46bd-ae65-b683e7707cb0'
+            ],
+            RETRY_MAX: 3,          // 最大重试次数
+            RETRY_DELAY: 2000,     // 重试延时（毫秒）
+            FILE_MAIN: '提取成功的微软账号.txt',
+            FILE_BACKUP: '提取微软账号备用.txt',
+            FILE_SIMPLE: '提取的微软账号_仅邮箱密码.txt',
+            REQUEST_TIMEOUT: 60000, // 批量请求超时延长至60秒
+            CYCLE_MAX: 100,        // 最大循环次数限制
+            SINGLE_MAX: 1000,      // 单次最大数量限制
+            TOTAL_MAX: 100000,     // 总数量上限（10万）
+            STOCK_UPDATE_INTERVAL: 10000, // 库存自动更新间隔（10秒）
+        };
+
+        // ===================== 全局状态 =====================
+        let state = {
+            successCount: 0,
+            failureCount: 0,
+            balanceCount: '-',
+            isRunning: false,
+            mainData: [],          // 完整数据
+            simpleData: [],        // 仅邮箱密码数据
+            backupData: [],
+            abortController: null,
+            targetCount: 0,        // 总目标数量
+            singleCount: 0,        // 单次获取数量
+            cycleCount: 0,         // 总循环次数
+            currentCycle: 0,       // 当前循环次数
+            onlyEmailPwd: false,   // 仅提取邮箱密码状态
+            cycleDelayMs: 3000,    // 循环间隔延时
+            stockUpdateTimer: null // 库存更新定时器ID
+        };
+
+        // ===================== DOM 元素 =====================
+        const els = {
+            cardNumber: document.getElementById('cardNumber'),
+            emailCount: document.getElementById('emailCount'),
+            cycleCount: document.getElementById('cycleCount'),
+            delayMs: document.getElementById('delayMs'),
+            cycleDelayMs: document.getElementById('cycleDelayMs'),
+            functionType: document.getElementById('functionType'),
+            autoDownload: document.getElementById('autoDownload'),
+            onlyEmailPwd: document.getElementById('onlyEmailPwd'),
+            startBtn: document.getElementById('startBtn'),
+            stopBtn: document.getElementById('stopBtn'),
+            balanceBtn: document.getElementById('balanceBtn'),
+            clearLogBtn: document.getElementById('clearLogBtn'),
+            copyLogBtn: document.getElementById('copyLogBtn'),
+            downloadMainBtn: document.getElementById('downloadMainBtn'),
+            downloadBackupBtn: document.getElementById('downloadBackupBtn'),
+            logArea: document.getElementById('logArea'),
+            successCount: document.getElementById('successCount'),
+            failureCount: document.getElementById('failureCount'),
+            currentCycle: document.getElementById('currentCycle'),
+            balanceCount: document.getElementById('balanceCount'),
+            errorAlert: document.getElementById('errorAlert'),
+            errorAlertText: document.getElementById('errorAlertText'),
+            stock4: document.getElementById('stock4'),
+            stock5: document.getElementById('stock5'),
+            stockStatus4: document.querySelector('#stock4 + .stock-desc + .stock-status'),
+            stockStatus5: document.querySelector('#stock5 + .stock-desc + .stock-status')
+        };
+
+        // ===================== 核心工具函数 =====================
+        /**
+         * 日志函数：仅显示获取到的邮箱数据（其他日志仅控制台输出）
+         * @param {string} content - 日志内容
+         * @param {string} type - 日志类型（仅 'email' 类型会显示在页面）
+         */
+        function log(content, type = 'info') {
+            // 仅当类型为 'email' 时，显示在页面日志区域
+            if (type === 'email') {
+                const timestamp = new Date().toLocaleString();
+                const logItem = document.createElement('div');
+                logItem.innerHTML = `<span class="timestamp">[${timestamp}]</span> <span class="success">${escapeHtml(content)}</span>`;
+                els.logArea.appendChild(logItem);
+                els.logArea.scrollTop = els.logArea.scrollHeight;
+            } else {
+                // 其他日志仅在控制台输出（便于调试，不影响页面）
+                console.log(`[${new Date().toLocaleString()}] [${type.toUpperCase()}] ${content}`);
+            }
+        }
+
+        function escapeHtml(html) {
+            return html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        function showError(message) {
+            els.errorAlertText.textContent = message;
+            els.errorAlert.classList.remove('d-none');
+            setTimeout(() => {
+                els.errorAlert.classList.add('d-none');
+            }, 5000);
+        }
+
+        function safeParseJson(text, fallback = null) {
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                return fallback;
+            }
+        }
+
+        async function requestApi(url, signal) {
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    signal,
+                    timeout: CONFIG.REQUEST_TIMEOUT,
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+                        'Accept': '*/*',
+                        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP错误：${response.status}`);
+                }
+
+                const responseText = await response.text();
+                return responseText;
+            } catch (e) {
+                if (signal?.aborted) {
+                    throw new Error('请求已取消');
+                }
+                throw e;
+            }
+        }
+
+        function setStockStatus(index, status, value = '-', msg = '') {
+            const stockEl = els[`stock${index}`];
+            const statusEl = els[`stockStatus${index}`];
+            
+            if (!stockEl || !statusEl) return;
+
+            stockEl.textContent = value;
+
+            switch (status) {
+                case 'loading':
+                    statusEl.className = 'stock-status status-loading';
+                    statusEl.innerHTML = `<i class="bi bi-arrow-clockwise"></i> ${msg || '加载中'}`;
+                    break;
+                case 'success':
+                    statusEl.className = 'stock-status status-success';
+                    statusEl.innerHTML = `<i class="bi bi-check-circle"></i> ${msg || '更新成功'}`;
+                    stockEl.style.color = value === '0' || value === 0 ? '#dc3545' : '#fff';
+                    break;
+                case 'error':
+                    statusEl.className = 'stock-status status-error';
+                    statusEl.innerHTML = `<i class="bi bi-exclamation-circle"></i> ${msg || '更新失败'}`;
+                    break;
+            }
+        }
+
+        /**
+         * 构建API请求配置
+         */
+        function getRequestConfig() {
+            const functionType = els.functionType.value;
+            const singleCount = parseInt(els.emailCount.value) || 1;
+            const cycleCount = parseInt(els.cycleCount.value) || 1;
+            const totalCount = singleCount * cycleCount;
+
+            const config = {
+                type: functionType,
+                emailType: functionType === '5' ? 'hotmail' : 'outlook',
+                cardNumber: els.cardNumber.value.trim(),
+                singleCount: singleCount,
+                cycleCount: cycleCount,
+                totalCount: totalCount,
+                delayMs: parseInt(els.delayMs.value) || 0,
+                cycleDelayMs: parseInt(els.cycleDelayMs.value) || 3000,
+                onlyEmailPwd: els.onlyEmailPwd.checked,
+                mainFileName: CONFIG.FILE_MAIN,
+                simpleFileName: CONFIG.FILE_SIMPLE,
+                backupFileName: CONFIG.FILE_BACKUP
+            };
+
+            // 验证参数有效性
+            if (!config.cardNumber) throw new Error('卡号不能为空');
+            if (config.singleCount < 1 || config.singleCount > CONFIG.SINGLE_MAX) throw new Error(`单次数量1-${CONFIG.SINGLE_MAX}个`);
+            if (config.cycleCount < 1 || config.cycleCount > CONFIG.CYCLE_MAX) throw new Error(`循环次数1-${CONFIG.CYCLE_MAX}次`);
+            if (config.totalCount > CONFIG.TOTAL_MAX) throw new Error(`总数量≤${CONFIG.TOTAL_MAX}个`);
+            if (config.delayMs < 0 || config.delayMs > 10000) throw new Error('单次延时0-10000ms');
+            if (config.cycleDelayMs < 0 || config.cycleDelayMs > 30000) throw new Error('循环间隔0-30000ms');
+
+            // 构建批量获取API地址
+            config.apiUrl = `${CONFIG.API_ORIGIN.SHANKEYUN}/buy?type=${config.emailType}&num=${config.singleCount}&card=${config.cardNumber}`;
+
+            return config;
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ===================== 数据处理函数 =====================
+        /**
+         * 解析完整邮箱数据
+         */
+        function parseFullEmail(rawData) {
+            const parts = rawData.split('----');
+            if (parts.length !== 4) {
+                return rawData;
+            }
+
+            let token = parts[3];
+            for (const t of CONFIG.TOKEN_LIST) {
+                if (parts[3].includes(t)) {
+                    token = t;
+                    break;
+                }
+            }
+
+            return `${parts[0]}----${parts[1]}----${token}----${parts[2]}`;
+        }
+
+        /**
+         * 仅提取邮箱和密码
+         */
+        function parseOnlyEmailPwd(rawData) {
+            const parts = rawData.split('----');
+            if (parts.length < 2) {
+                return rawData; // 格式异常时返回原始数据
+            }
+            
+            // 只保留邮箱（账号）和密码，用分隔符连接
+            return `${parts[0]}----${parts[1]}`;
+        }
+
+        // ===================== 核心功能函数 =====================
+        async function callBatchEmailApi(config, cycleIndex) {
+            let retryCount = 0;
+            const { signal } = state.abortController;
+
+            while (retryCount < CONFIG.RETRY_MAX) {
+                try {
+                    retryCount++;
+                    
+                    log(`【${cycleIndex}/${config.cycleCount}轮】获取${config.singleCount}个${config.emailType}邮箱${config.onlyEmailPwd ? '（仅账号密码）' : ''}`, 'cycle');
+                    const responseText = await requestApi(config.apiUrl, signal);
+
+                    if (responseText.includes('----')) {
+                        const emailList = responseText.split('\n').filter(line => line.includes('----') && line.includes('@'));
+                        return { 
+                            success: true, 
+                            data: emailList, 
+                            count: emailList.length,
+                            error: '' 
+                        };
+                    } else {
+                        const json = safeParseJson(responseText, {});
+                        const errorMsg = json.msg || responseText || '获取失败';
+                        const fatalErrors = ['余额不足', '无此卡号', '库存不足', '卡号错误'];
+                        const isFatal = fatalErrors.some(err => errorMsg.includes(err));
+                        return { 
+                            success: false, 
+                            data: responseText, 
+                            error: errorMsg, 
+                            fatal: isFatal 
+                        };
+                    }
+                } catch (e) {
+                    if (signal.aborted) {
+                        throw new Error('请求已取消');
+                    }
+                    const errorMsg = `API调用失败：${e.message}`;
+                    if (retryCount >= CONFIG.RETRY_MAX) {
+                        return { success: false, data: '', error: errorMsg };
+                    }
+                    showError(`【${cycleIndex}轮】失败，${CONFIG.RETRY_DELAY}ms后重试（${retryCount}/${CONFIG.RETRY_MAX}）`);
+                    await delay(CONFIG.RETRY_DELAY);
+                }
+            }
+        }
+
+        async function startBatchGetEmails() {
+            if (state.isRunning) {
+                showError('正在运行中，请勿重复点击');
+                return;
+            }
+
+            try {
+                const config = getRequestConfig();
+                
+                // 初始化全局状态
+                state.isRunning = true;
+                state.mainData = [];
+                state.simpleData = [];
+                state.backupData = [];
+                state.successCount = 0;
+                state.failureCount = 0;
+                state.targetCount = config.totalCount;
+                state.singleCount = config.singleCount;
+                state.cycleCount = config.cycleCount;
+                state.currentCycle = 0;
+                state.onlyEmailPwd = config.onlyEmailPwd;
+                state.cycleDelayMs = config.cycleDelayMs;
+                state.abortController = new AbortController();
+
+                // 更新UI状态
+                els.successCount.textContent = '0';
+                els.failureCount.textContent = '0';
+                els.currentCycle.textContent = `0/${config.cycleCount}`;
+                els.startBtn.disabled = true;
+                els.stopBtn.disabled = false;
+                els.downloadMainBtn.disabled = true;
+                els.downloadBackupBtn.disabled = true;
+                els.balanceBtn.disabled = true;
+
+                // 暂停库存自动更新（避免获取过程中频繁请求）
+                pauseStockUpdate();
+                log(`===== 开始循环获取 =====`, 'info');
+                showError(`开始获取：${config.emailType}邮箱 ${config.totalCount}个`);
+
+                // 执行循环
+                for (let i = 1; i <= config.cycleCount; i++) {
+                    if (!state.isRunning) break; // 如果已停止，退出循环
+                    
+                    state.currentCycle = i;
+                    els.currentCycle.textContent = `${i}/${config.cycleCount}`;
+
+                    // 单次请求延时
+                    if (config.delayMs > 0 && i === 1) {
+                        showError(`首轮延时${config.delayMs}ms...`);
+                        await delay(config.delayMs);
+                    }
+
+                    try {
+                        // 执行单次获取
+                        const result = await callBatchEmailApi(config, i);
+
+                        if (result.success) {
+                            // 根据模式处理数据
+                            if (config.onlyEmailPwd) {
+                                const cycleSimpleData = result.data.map(email => parseOnlyEmailPwd(email));
+                                state.simpleData.push(...cycleSimpleData);
+                                state.successCount += cycleSimpleData.length;
+                                
+                                showError(`【${i}轮】成功获取${cycleSimpleData.length}个（仅账号密码）`);
+                                // 输出邮箱到日志区域（类型设为 'email'）
+                                cycleSimpleData.forEach((item, index) => {
+                                    const [email, pwd] = item.split('----');
+                                    log(`[总${state.successCount}] ${email} | ${pwd}`, 'email');
+                                });
+                            } else {
+                                const cycleMainData = result.data.map(email => parseFullEmail(email));
+                                state.mainData.push(...cycleMainData);
+                                state.successCount += cycleMainData.length;
+                                
+                                showError(`【${i}轮】成功获取${cycleMainData.length}个`);
+                                // 输出邮箱到日志区域（类型设为 'email'）
+                                cycleMainData.forEach((email, index) => {
+                                    log(`[总${state.successCount}] ${email}`, 'email');
+                                });
+                            }
+
+                            // 计算本轮失败数量
+                            const cycleFailure = config.singleCount - result.count;
+                            state.failureCount += cycleFailure;
+
+                            // 更新统计UI
+                            els.successCount.textContent = state.successCount;
+                            els.failureCount.textContent = state.failureCount;
+
+                            if (cycleFailure > 0) {
+                                showError(`【${i}轮】部分成功：${result.count}/${config.singleCount}个`);
+                            }
+                        } else {
+                            // 本轮获取失败
+                            const cycleFailure = config.singleCount;
+                            state.failureCount += cycleFailure;
+                            els.failureCount.textContent = state.failureCount;
+
+                            showError(`【${i}轮】失败：${result.error}`);
+                            log(`【${i}轮】失败：${result.error}`, 'error');
+
+                            if (result.data) {
+                                state.backupData.push(result.data);
+                            }
+
+                            // 如果是致命错误，停止后续循环
+                            if (result.fatal) {
+                                showError(`严重错误：${result.error}，已停止`);
+                                break;
+                            }
+                        }
+
+                        // 循环间隔延时（最后一轮不需要）
+                        if (i < config.cycleCount && config.cycleDelayMs > 0 && state.isRunning) {
+                            showError(`【${i}轮】完成，${config.cycleDelayMs}ms后下一轮...`);
+                            await delay(config.cycleDelayMs);
+                        }
+
+                    } catch (e) {
+                        if (e.message === '请求已取消') {
+                            throw e; // 抛出取消错误，在外部处理
+                        } else {
+                            const cycleFailure = config.singleCount;
+                            state.failureCount += cycleFailure;
+                            els.failureCount.textContent = state.failureCount;
+
+                            showError(`【${i}轮】异常：${e.message}`);
+                            log(`【${i}轮】异常：${e.message}`, 'error');
+
+                            // 循环间隔延时（异常后也需要间隔）
+                            if (i < config.cycleCount && config.cycleDelayMs > 0 && state.isRunning) {
+                                await delay(config.cycleDelayMs);
+                            }
+                        }
+                    }
+                }
+
+                // 循环执行完成
+                const finishMsg = `循环完成：总计${config.totalCount}个 | 成功${state.successCount}个 | 失败${state.failureCount}个 | 完成${state.currentCycle}/${config.cycleCount}轮`;
+                showError(finishMsg);
+
+                // 自动下载逻辑
+                if (state.isRunning && els.autoDownload.checked) {
+                    if (config.onlyEmailPwd && state.simpleData.length > 0) {
+                        downloadFile(state.simpleData, config.simpleFileName);
+                    } else if (!config.onlyEmailPwd && state.mainData.length > 0) {
+                        downloadFile(state.mainData, config.mainFileName);
+                    }
+                }
+
+                // 更新下载按钮状态
+                if (config.onlyEmailPwd) {
+                    els.downloadMainBtn.disabled = state.simpleData.length === 0;
+                    els.downloadMainBtn.innerHTML = `<i class="bi bi-download"></i> 下载邮箱密码（${state.simpleData.length}条）`;
+                } else {
+                    els.downloadMainBtn.disabled = state.mainData.length === 0;
+                    els.downloadMainBtn.innerHTML = `<i class="bi bi-download"></i> 下载主文件（${state.mainData.length}条）`;
+                }
+                els.downloadBackupBtn.disabled = state.backupData.length === 0;
+
+                // 恢复库存自动更新
+                resumeStockUpdate();
+
+            } catch (e) {
+                if (e.message === '请求已取消') {
+                    showError('循环已取消');
+                } else {
+                    showError(`执行异常：${e.message}`);
+                    state.failureCount = state.targetCount - state.successCount;
+                    els.failureCount.textContent = state.failureCount;
+                }
+                // 恢复库存自动更新
+                resumeStockUpdate();
+            } finally {
+                state.isRunning = false;
+                state.abortController = null;
+                els.startBtn.disabled = false;
+                els.stopBtn.disabled = true;
+                els.balanceBtn.disabled = false;
+                els.startBtn.innerHTML = '<i class="bi bi-play-fill"></i> 开始获取';
+            }
+        }
+
+        function stopGetEmails() {
+            if (!state.isRunning) {
+                showError('当前未在运行');
+                return;
+            }
+
+            showError(`停止获取：完成${state.currentCycle}/${state.cycleCount}轮 | 成功${state.successCount}个`);
+            state.isRunning = false;
+            
+            if (state.abortController) {
+                state.abortController.abort();
+            }
+
+            els.startBtn.innerHTML = '<i class="bi bi-play-fill"></i> 重新开始';
+            
+            // 恢复库存自动更新
+            resumeStockUpdate();
+        }
+
+        // ===================== 库存自动更新相关 =====================
+        /**
+         * 查询库存（不显示库存更新日志）
+         */
+        async function queryStock() {
+            const stockApi = {
+                url: `${CONFIG.API_ORIGIN.SHANKEYUN}/stock`,
+                type: 'shankeyun'
+            };
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), CONFIG.REQUEST_TIMEOUT);
+                
+                try {
+                    const responseText = await requestApi(stockApi.url, controller.signal);
+                    const json = safeParseJson(responseText, {});
+
+                    const hotmailStock = json.hotmail?.toString() || '0';
+                    const outlookStock = json.outlook?.toString() || '0';
+                    
+                    setStockStatus(4, 'success', hotmailStock);
+                    setStockStatus(5, 'success', outlookStock);
+                    
+                    // 库存更新日志仅控制台输出
+                    log(`库存自动更新：hotmail=${hotmailStock} | outlook=${outlookStock}`, 'stock-update');
+                } catch (e) {
+                    const errorMsg = e.message || '未知错误';
+                    setStockStatus(4, 'error', '?', errorMsg);
+                    setStockStatus(5, 'error', '?', errorMsg);
+                    log(`库存更新失败：${errorMsg}`, 'error');
+                    showError(`库存更新失败：${errorMsg}`);
+                } finally {
+                    clearTimeout(timeoutId);
+                }
+            } catch (e) {
+                showError(e.message);
+            }
+        }
+
+        /**
+         * 启动库存自动更新
+         */
+        function startStockUpdate() {
+            // 先执行一次更新
+            queryStock();
+            
+            // 设置定时器，每10秒更新一次
+            state.stockUpdateTimer = setInterval(() => {
+                // 如果正在获取邮箱，跳过本次更新（避免冲突）
+                if (!state.isRunning) {
+                    queryStock();
+                } else {
+                    log('正在获取邮箱中，暂不更新库存', 'stock-update');
+                }
+            }, CONFIG.STOCK_UPDATE_INTERVAL);
+            
+            log(`库存自动更新已启动（每${CONFIG.STOCK_UPDATE_INTERVAL/1000}秒一次）`, 'stock-update');
+        }
+
+        /**
+         * 暂停库存自动更新
+         */
+        function pauseStockUpdate() {
+            if (state.stockUpdateTimer) {
+                clearInterval(state.stockUpdateTimer);
+                state.stockUpdateTimer = null;
+                log('库存自动更新已暂停', 'stock-update');
+            }
+        }
+
+        /**
+         * 恢复库存自动更新
+         */
+        function resumeStockUpdate() {
+            if (!state.stockUpdateTimer && !state.isRunning) {
+                startStockUpdate();
+            }
+        }
+
+        async function queryBalance() {
+            const cardNumber = els.cardNumber.value.trim();
+
+            els.balanceBtn.disabled = true;
+            els.balanceBtn.innerHTML = '<i class="bi bi-spinner bi-spin"></i> 查询中';
+
+            try {
+                if (cardNumber) {
+                    try {
+                        const url = `${CONFIG.API_ORIGIN.SHANKEYUN}/balance?card=${cardNumber}`;
+                        const responseText = await requestApi(url, new AbortController().signal);
+                        const json = safeParseJson(responseText, {});
+
+                        if (json.status === 1) {
+                            const count = json.balance || '0';
+                            const config = getRequestConfig(); // 检查当前配置的总数量
+                            
+                            state.balanceCount = count;
+                            els.balanceCount.textContent = count;
+                            
+                            const balanceMsg = `剩余可注册：${count}个`;
+                            
+                            // 检查余额是否足够
+                            if (config.totalCount > parseInt(count)) {
+                                log(`${balanceMsg}（警告：余额不足${config.totalCount}个）`, 'warning');
+                                showError(`${balanceMsg} - 余额不足！`);
+                            } else {
+                                showError(balanceMsg);
+                                log(balanceMsg, 'balance');
+                            }
+                            
+                            if (count === '0' || parseInt(count) === 0) {
+                                log('警告：余额已用尽，请充值或更换卡号', 'warning');
+                                showError('警告：余额已用尽，请充值或更换卡号');
+                            }
+                        } else {
+                            const errorMsg = json.msg || '查询失败';
+                            showError(`余额查询失败：${errorMsg}`);
+                            log(`余额查询失败：${errorMsg}`, 'error');
+                            
+                            state.balanceCount = '-';
+                            els.balanceCount.textContent = '-';
+                        }
+                    } catch (e) {
+                        const errorMsg = `接口请求失败：${e.message}`;
+                        showError(errorMsg);
+                        log(errorMsg, 'error');
+                        state.balanceCount = '-';
+                        els.balanceCount.textContent = '-';
+                    }
+                } else {
+                    const errorMsg = '卡号为空，无法查询';
+                    showError(errorMsg);
+                    log(errorMsg, 'error');
+                    state.balanceCount = '-';
+                    els.balanceCount.textContent = '-';
+                }
+            } catch (e) {
+                const errorMsg = `余额查询异常：${e.message}`;
+                showError(errorMsg);
+                log(errorMsg, 'error');
+                state.balanceCount = '-';
+                els.balanceCount.textContent = '-';
+            } finally {
+                els.balanceBtn.disabled = false;
+                els.balanceBtn.innerHTML = '<i class="bi bi-wallet-fill"></i> 查询余额';
+            }
+        }
+
+        function downloadFile(data, filename) {
+            if (data.length === 0) {
+                showError('无数据可下载');
+                return;
+            }
+            const blob = new Blob([data.join('\n')], { type: 'text/plain; charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showError(`已下载：${filename}（${data.length}条）`);
+        }
+
+        function copyLog() {
+            const logText = els.logArea.innerText;
+            if (!logText) {
+                showError('日志为空，无内容可复制');
+                return;
+            }
+
+            navigator.clipboard.writeText(logText).then(() => {
+                showError('邮箱数据已复制到剪贴板');
+            }).catch(err => {
+                showError(`复制失败：${err.message}`);
+            });
+        }
+
+        // ===================== 事件监听 =====================
+        els.startBtn.addEventListener('click', startBatchGetEmails);
+        els.stopBtn.addEventListener('click', stopGetEmails);
+        els.balanceBtn.addEventListener('click', queryBalance);
+        els.clearLogBtn.addEventListener('click', () => {
+            els.logArea.innerHTML = '';
+            showError('日志已清空');
+        });
+        els.copyLogBtn.addEventListener('click', copyLog);
+        
+        // 下载按钮点击事件
+        els.downloadMainBtn.addEventListener('click', () => {
+            try {
+                const config = getRequestConfig();
+                if (config.onlyEmailPwd) {
+                    downloadFile(state.simpleData, config.simpleFileName);
+                } else {
+                    downloadFile(state.mainData, config.mainFileName);
+                }
+            } catch (e) {
+                showError(`下载失败：${e.message}`);
+            }
+        });
+        
+        els.downloadBackupBtn.addEventListener('click', () => {
+            try {
+                const config = getRequestConfig();
+                downloadFile(state.backupData, config.backupFileName);
+            } catch (e) {
+                showError(`下载失败：${e.message}`);
+            }
+        });
+
+        // 勾选框状态变化时更新下载按钮文本
+        els.onlyEmailPwd.addEventListener('change', () => {
+            if (els.onlyEmailPwd.checked) {
+                els.downloadMainBtn.innerHTML = `<i class="bi bi-download"></i> 下载邮箱密码${state.simpleData.length > 0 ? `（${state.simpleData.length}条）` : ''}`;
+            } else {
+                els.downloadMainBtn.innerHTML = `<i class="bi bi-download"></i> 下载令牌文件${state.mainData.length > 0 ? `（${state.mainData.length}条）` : ''}`;
+            }
+        });
+
+        // 页面加载时启动库存自动更新
+        window.addEventListener('load', () => {
+            startStockUpdate();
+        });
+
+        // 页面卸载时清除定时器，避免内存泄漏
+        window.addEventListener('beforeunload', () => {
+            if (state.stockUpdateTimer) {
+                clearInterval(state.stockUpdateTimer);
+            }
+            if (state.abortController) {
+                state.abortController.abort();
+            }
+        });
+    </script>
+</body>
+</html>
